@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+env/
+venv/
+uploads/*
+!.gitkeep
+.vscode/
+processed/
+cyberops.db
+.DS_Store

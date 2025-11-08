@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block pagetitle %}Log Monitor{% endblock %}
+{% block content %}
+{% set keyword_text = results.keywords if results else "fail, error, denied, invalid, unauthorized" %}
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card-soft h-100">
+      <p class="text-uppercase text-muted small mb-2">Upload</p>
+      <h4 class="mb-3">Scan log evidence</h4>
+      <p class="text-muted small mb-4">Supported formats: .log, .txt (50 MB). We highlight error lines and blend in an ML anomaly score.</p>
+      <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label for="logfile" class="form-label">Log file</label>
+          <input class="form-control" type="file" id="logfile" name="logfile" accept=".log,.txt" required>
+        </div>
+        <button class="btn btn-primary w-100" type="submit">Upload &amp; Scan</button>
+      </form>
+      <div class="mt-4">
+        <p class="text-uppercase text-muted small mb-2">Keywords watched</p>
+        <div class="keyword-chips">
+          {% for keyword in keyword_text.split(", ") %}
+            <span class="keyword-chip">{{ keyword }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card-soft h-100">
+      {% if results %}
+        {% set severity = results.severity %}
+        {% if severity in ['safe', 'clean'] %}
+          {% set flag = 'success' %}
+        {% elif severity == 'warning' %}
+          {% set flag = 'warn' %}
+        {% else %}
+          {% set flag = 'danger' %}
+        {% endif %}
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+          <h5 class="mb-0">Latest scan</h5>
+          <span class="stat-chip {{ flag }}">Severity: {{ results.severity|title }}</span>
+          <span class="stat-chip warn">ML {{ results.ml_label|title }} · {{ results.ml_score }}%</span>
+        </div>
+        <div class="stat-grid mb-3">
+          <div class="stat-card">
+            <div class="label">Lines processed</div>
+            <div class="value">{{ results.total }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Suspicious hits</div>
+            <div class="value">{{ results.suspicious }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Ratio</div>
+            <div class="value">{{ results.ratio }}%</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">File name</div>
+            <div class="value fs-5">{{ results.filename }}</div>
+          </div>
+        </div>
+        {% if results.samples and results.samples|length > 0 %}
+          <p class="text-muted small mb-2">Sample suspicious lines (max 10)</p>
+          <pre class="mb-0">{% for line in results.samples %}{{ line }}
+{% endfor %}</pre>
+        {% else %}
+          <div class="empty-state">
+            <i class="bi bi-check2-circle"></i>
+            <p class="mb-0">No suspicious strings detected in the first pass.</p>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="empty-state">
+          <i class="bi bi-upload"></i>
+          <p class="mb-0">Upload a log to see rule-based highlights and anomaly scores.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

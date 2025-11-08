@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block pagetitle %}Dashboard{% endblock %}
+{% block content %}
+<div class="row g-4 mb-4">
+  <div class="col-xl-4 col-lg-6">
+    <div class="card-soft h-100">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <p class="text-uppercase text-muted small mb-1">Your Security Posture</p>
+          <h3 class="mb-1">Operational</h3>
+          <p class="text-muted mb-0">Coverage across logs, phishing, intel and crypto modules.</p>
+        </div>
+        <span class="badge-pill badge-clean">Stable</span>
+      </div>
+      <div class="mini-chart w-100"></div>
+    </div>
+  </div>
+  <div class="col-xl-4 col-lg-6">
+    <div class="card-soft h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Recent Activity</h5>
+        <span class="text-muted small">Last 5 events</span>
+      </div>
+      {% if recent %}
+        <ul class="list-clean small">
+          {% for row in recent %}
+            <li>
+              <div class="d-flex justify-content-between">
+                <span class="text-capitalize fw-semibold">{{ row.module }}</span>
+                <span class="text-muted">{{ row.created_at }}</span>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="empty-state">
+          <i class="bi bi-activity"></i>
+          <p class="mb-0">Your actions will appear here after you run a module.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-xl-4">
+    <div class="card-soft h-100">
+      <p class="text-uppercase text-muted small mb-2">Analyst Notes</p>
+      <h5 class="mb-3">Environment</h5>
+      <ul class="list-clean small mb-4">
+        <li>Threat Intel APIs: {{ 'Configured' if stats else 'Demo Mode' }}</li>
+        <li>HTTPS Enforcement: toggle via ENFORCE_HTTPS</li>
+        <li>Uploads Folder: /uploads</li>
+      </ul>
+      <button class="btn btn-outline w-100">Review Playbooks</button>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12">
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="label">Log scans</div>
+        <div class="value">{{ stats.get('logs', 0) }}</div>
+        <div class="text-muted small">Keyword + ML anomaly triage</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Phishing checks</div>
+        <div class="value">{{ stats.get('phishing', 0) }}</div>
+        <div class="text-muted small">Detections via heuristics + ML</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Integrity verifications</div>
+        <div class="value">{{ stats.get('integrity', 0) }}</div>
+        <div class="text-muted small">SHA-256 matches this session</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Threat intel pulls</div>
+        <div class="value">{{ stats.get('threat', 0) }}</div>
+        <div class="text-muted small">Aggregated from VT + AbuseIPDB + Shodan</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

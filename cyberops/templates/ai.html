@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block pagetitle %}AI Analyst{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-xl-7">
+    <div class="card-soft chat-shell h-100">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <p class="text-uppercase text-muted small mb-1">Alpha preview</p>
+          <h5 class="mb-0">Investigation thread</h5>
+        </div>
+        <span class="badge-pill badge-suspicious">demo</span>
+      </div>
+      <div class="chat-thread">
+        <div class="chat-bubble">
+          <strong>AI:</strong> Ready to summarise latest alerts. Provide context such as log snippets, threat intel hits, or policy questions.
+        </div>
+        <div class="chat-bubble user">
+          Analyst: Collate anomalies from last log scan and pivot on suspicious hostnames.
+        </div>
+        <div class="chat-bubble">
+          <strong>AI:</strong> Detected 12% error ratio, host: auth-core.internal. Recommend blocking repeated IP 203.0.113.42 and escalating to Tier-2.
+        </div>
+      </div>
+      <form class="chat-input">
+        <textarea placeholder="Coming soon — connect this area to your AI back-end." disabled></textarea>
+        <button class="btn btn-primary" type="button" disabled>
+          <i class="bi bi-send"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+  <div class="col-xl-5">
+    <div class="card-soft summary-card">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Summary</h5>
+        <span class="badge-pill badge-suspicious">Medium</span>
+      </div>
+      <p class="text-muted small mb-3">Auto-generated highlights from AI assistant.</p>
+      <p class="text-uppercase text-muted small mb-2">Indicators</p>
+      <ul class="list-clean small mb-4">
+        <li>auth-core.internal · 12 failed logins</li>
+        <li>203.0.113.42 · suspicious port scan</li>
+        <li>vt-digest: 3 malicious engines</li>
+      </ul>
+      <p class="text-uppercase text-muted small mb-2">Recommended actions</p>
+      <ul class="list-clean small mb-0">
+        <li>Quarantine affected workstation scope.</li>
+        <li>Request VT rescan with latest sample.</li>
+        <li>Escalate to IR runbook section 4.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

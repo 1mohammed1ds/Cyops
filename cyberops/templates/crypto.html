@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-lg-8 mx-auto">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h4 class="card-title">Encryption Tool</h4>
+        <p class="text-muted">AES-GCM with password-derived keys. Encrypted files include salt and nonce; keep your password safe to decrypt later.</p>
+        <form method="POST" enctype="multipart/form-data" class="row g-3">
+          <div class="col-12">
+            <label for="file" class="form-label">File</label>
+            <input type="file" class="form-control" id="file" name="file" required>
+          </div>
+          <div class="col-md-6">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Mode</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="mode" id="modeEncrypt" value="encrypt" {% if request.form.get('mode', 'encrypt') != 'decrypt' %}checked{% endif %}>
+                <label class="form-check-label" for="modeEncrypt">Encrypt</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="mode" id="modeDecrypt" value="decrypt" {% if request.form.get('mode') == 'decrypt' %}checked{% endif %}>
+                <label class="form-check-label" for="modeDecrypt">Decrypt</label>
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <button class="btn btn-primary" type="submit">Process</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {% if result %}
+      <div class="alert alert-success d-flex justify-content-between align-items-center">
+        <span>{{ result.message }}</span>
+        <a class="btn btn-outline-light btn-sm" href="{{ result.download }}">Download file</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

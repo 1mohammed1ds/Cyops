@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block pagetitle %}Threat Intelligence{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-xl-8">
+    <div class="card-soft mb-4">
+      <p class="text-uppercase text-muted small mb-2">Indicator</p>
+      <h4 class="mb-3">Check IPs &amp; domains across your feeds</h4>
+      <p class="text-muted small mb-4">We combine VirusTotal, AbuseIPDB, and Shodan verdicts. Missing API keys trigger demo data so you can still test workflows.</p>
+      <form method="POST">
+        <div class="row g-3 align-items-end">
+          <div class="col-lg-9">
+            <label for="indicator" class="form-label">IP address or domain</label>
+            <input type="text" class="form-control" id="indicator" name="indicator" placeholder="8.8.8.8 or example.com" required value="{{ request.form.get('indicator', '') }}">
+          </div>
+          <div class="col-lg-3 d-grid">
+            <button class="btn btn-primary" type="submit">Check reputation</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    {% if result %}
+      {% set verdict = result.combined.verdict %}
+      {% if verdict == 'malicious' %}
+        {% set badge = 'badge-malicious' %}
+      {% elif verdict == 'suspicious' %}
+        {% set badge = 'badge-suspicious' %}
+      {% else %}
+        {% set badge = 'badge-clean' %}
+      {% endif %}
+      <div class="card-soft mb-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <div>
+            <p class="text-uppercase text-muted small mb-1">Combined verdict</p>
+            <h5 class="mb-0">{{ result.indicator }}</h5>
+          </div>
+          <span class="verdict-badge {{ badge }}">{{ verdict }}</span>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <div class="chip">
+            <span class="label">Malicious</span>
+            <strong>{{ result.combined.malicious }}</strong>
+          </div>
+          <div class="chip">
+            <span class="label">Suspicious</span>
+            <strong>{{ result.combined.suspicious }}</strong>
+          </div>
+          <div class="chip">
+            <span class="label">Abuse score</span>
+            <strong>{{ result.combined.abuseScore }}%</strong>
+          </div>
+        </div>
+        <a class="btn btn-outline" href="#" role="button">View full report</a>
+      </div>
+
+      <div class="row g-4">
+        {% for source in result.sources %}
+          <div class="col-md-6 col-lg-4">
+            <div class="card-soft h-100">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">{{ source.source }}</h6>
+                {% if source.demo %}
+                  <span class="badge-pill badge-suspicious">demo</span>
+                {% endif %}
+              </div>
+              {% if source.error %}
+                <div class="alert alert-warning soft small mb-0">{{ source.error }}</div>
+              {% else %}
+                <ul class="list-unstyled mb-0 small">
+                  {% for key, value in source.items() if key not in ['source', 'demo'] %}
+                    <li class="d-flex justify-content-between">
+                      <span class="text-muted">{{ key }}</span>
+                      <strong>{{ value }}</strong>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
