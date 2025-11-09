@@ -4,6 +4,7 @@ Overview:
 CyberOpsHub is a unified web-based Security Operations Center (SOC) dashboard built with Flask, designed to integrate multiple cybersecurity utilities — log monitoring, file-integrity verification, phishing detection, and threat-intelligence lookups — into a single, AI-ready interface.
 
 ✨ Key Features:
+------------------
 
 Log Monitor: Upload and analyze system logs for failed logins, unauthorized access, or error events.
 
@@ -18,6 +19,7 @@ Modular Flask Architecture: Each tool runs independently but is unified under on
 Responsive Dashboard UI: Modern SaaS-style interface with dark sidebar, white content cards, and Bootstrap-based layout.
 
 🧰 Tech Stack:
+---------------
 
 Backend: Python (Flask, hashlib, requests)
 
@@ -28,6 +30,7 @@ APIs: VirusTotal (with environment variable support)
 Utilities: Virtual environments, pip dependencies, and modular file structure
 
 📂 Folder Structure:
+---------------------
 
 cyberops/
 ├── app.py
@@ -46,28 +49,33 @@ cyberops/
 🚀 Setup Instructions:
 
 Clone the repository
+----------------------
 
 git clone https://github.com/yourusername/cyberopshub.git
 cd cyberopshub
 
 
 Create a virtual environment
+-----------------------------
 
 python -m venv venv
 .\venv\Scripts\activate
 
 
 Install dependencies
+----------------------
 
 pip install -r requirements.txt
 
 
 (Optional) Set your VirusTotal API key
+---------------------------------------
 
 setx VT_API_KEY "YOUR_KEY_HERE"
 
 
 Run the app
+--------------
 
 python app.py
 
