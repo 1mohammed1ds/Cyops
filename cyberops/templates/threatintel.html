@@ -11,14 +11,14 @@
       <p class="text-uppercase text-muted small mb-2">Indicator</p>
       <h4 class="mb-3">Check IPs &amp; domains across your feeds</h4>
       <p class="text-muted small mb-4">We combine VirusTotal, AbuseIPDB, and Shodan verdicts. Missing API keys trigger demo data so you can still test workflows.</p>
-      <form method="POST">
+      <form method="POST" data-loading="true">
         <div class="row g-3 align-items-end">
           <div class="col-lg-9">
             <label for="indicator" class="form-label">IP address or domain</label>
             <input type="text" class="form-control" id="indicator" name="indicator" placeholder="8.8.8.8 or example.com" required value="{{ request.form.get('indicator', '') }}">
           </div>
           <div class="col-lg-3 d-grid">
-            <button class="btn btn-primary" type="submit">Check reputation</button>
+            <button class="btn btn-primary" type="submit" data-loading-button="Checking...">Check reputation</button>
           </div>
         </div>
       </form>

@@ -1,10 +1,11 @@
 import json
 import os
+import re
 import sqlite3
 import hashlib
 import uuid
 from datetime import datetime
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -19,6 +20,7 @@ from flask import (
     render_template,
     request,
     send_from_directory,
+    session,
     url_for,
 )
 from sklearn.linear_model import LogisticRegression
@@ -35,10 +37,32 @@ app = Flask(__name__)
 app.secret_key = os.getenv("CYBEROPS_SECRET", "dev-secret")
 app.config["UPLOAD_FOLDER"] = UPLOAD_DIR
 app.config["PROCESSED_FOLDER"] = PROCESSED_DIR
-app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB
+app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 app.config["ENFORCE_HTTPS"] = os.getenv("ENFORCE_HTTPS", "0").lower() in {"1", "true", "yes"}
 app.config["SESSION_COOKIE_SECURE"] = app.config["ENFORCE_HTTPS"]
 app.config["PREFERRED_URL_SCHEME"] = "https" if app.config["ENFORCE_HTTPS"] else "http"
+
+AI_SYSTEM_PROMPT = (
+    "You are CyOps, a calm and concise security analyst. Summarize analyst questions, "
+    "triage potential incidents, highlight indicators of compromise, and recommend next "
+    "actions using short bullet lists. When no threat is present, explain why."
+)
+AI_DEFAULT_THREAD = [
+    {
+        "role": "assistant",
+        "content": "CyOps AI ready. Share log snippets, indicators, or alerts and I'll build a rapid briefing.",
+    }
+]
+IP_PATTERN = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
+DOMAIN_PATTERN = re.compile(r"\b[a-z0-9-]+(?:\.[a-z0-9-]+){1,}\b", re.IGNORECASE)
+POSTURE_POINTS = [
+    (0, 90),
+    (60, 80),
+    (120, 60),
+    (180, 40),
+    (240, 55),
+    (300, 20),
+]
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(PROCESSED_DIR, exist_ok=True)
@@ -69,6 +93,139 @@ def log_activity(module: str, details: Dict) -> None:
         conn.commit()
 
 
+def compute_posture(stats: Dict[str, int]) -> Dict[str, object]:
+    """Derive a simple security posture score using usage stats."""
+    weights = {
+        "logs": 0.35,
+        "phishing": 0.2,
+        "integrity": 0.2,
+        "threat": 0.2,
+        "crypto": 0.05,
+    }
+    score = 0.0
+    for key, weight in weights.items():
+        score += min(stats.get(key, 0), 5) / 5 * weight
+    score = round(score * 100)
+
+    if score >= 80:
+        status, badge = "Operational", "Stable"
+        badge_class = "success"
+    elif score >= 55:
+        status, badge = "Focused", "Warning"
+        badge_class = "warn"
+    else:
+        status, badge = "Degraded", "Critical"
+        badge_class = "danger"
+
+    progress = max(0, min(score, 100))
+
+    def dot_coordinates(value: int) -> Tuple[float, float]:
+        x_target = (value / 100) * POSTURE_POINTS[-1][0]
+        x_prev, y_prev = POSTURE_POINTS[0]
+        for x_curr, y_curr in POSTURE_POINTS[1:]:
+            if x_target <= x_curr:
+                span = x_curr - x_prev or 1
+                ratio = (x_target - x_prev) / span
+                y = y_prev + (y_curr - y_prev) * ratio
+                break
+            x_prev, y_prev = x_curr, y_curr
+        else:
+            x_curr, y_curr = POSTURE_POINTS[-1]
+            y = y_curr
+            x_target = x_curr
+        left_pct = (x_target / POSTURE_POINTS[-1][0]) * 100
+        top_pct = (y / 120) * 100
+        return left_pct, top_pct
+
+    dot_left, dot_top = dot_coordinates(progress)
+    return {
+        "score": score,
+        "status": status,
+        "badge": badge,
+        "badge_class": badge_class,
+        "dot_left": dot_left,
+        "dot_top": dot_top,
+    }
+
+
+def demo_ai_response(prompt: str) -> str:
+    """Generate a lightweight deterministic response when no API key is present."""
+    lower = prompt.lower()
+    findings = []
+    if any(word in lower for word in ("failed", "denied", "invalid")):
+        findings.append("Repeated authentication failures detected – review IAM policies.")
+    if "ransom" in lower or "encrypt" in lower:
+        findings.append("Language suggests ransom activity; isolate affected hosts immediately.")
+    if "c2" in lower or "command and control" in lower:
+        findings.append("Potential command-and-control beaconing. Capture full packet traces.")
+    if not findings:
+        findings.append("No critical keywords spotted. Continue monitoring and enrich with intel feeds.")
+    return "\n".join(f"- {finding}" for finding in findings)
+
+
+def call_ai_backend(history: List[Dict[str, str]]) -> Dict[str, str]:
+    """Call the configured AI backend or fall back to a deterministic demo reply."""
+    api_key = os.getenv("AI_API_KEY")
+    if not api_key:
+        return {"message": demo_ai_response(history[-1]["content"]), "demo": True}
+
+    api_url = os.getenv("AI_API_URL", "https://api.openai.com/v1/chat/completions")
+    model = os.getenv("AI_MODEL", "gpt-4o-mini")
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    payload = {"model": model, "messages": history, "temperature": 0.2}
+    try:
+        response = requests.post(api_url, headers=headers, json=payload, timeout=25)
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        return {"error": f"AI request failed: {exc}"}
+    try:
+        data = response.json()
+        content = data["choices"][0]["message"]["content"].strip()
+    except (ValueError, KeyError, IndexError):
+        return {"error": "AI provider returned an unexpected response."}
+    return {"message": content, "demo": False}
+
+
+def build_ai_summary(messages: List[Dict[str, str]]) -> Dict[str, object]:
+    """Derive severity, indicators, and action items from the current conversation."""
+    if not messages:
+        return {"severity": "Info", "indicators": [], "actions": []}
+
+    scope = " ".join(entry["content"] for entry in messages[-6:])
+    lower = scope.lower()
+
+    severity = "Info"
+    if any(word in lower for word in ("ransom", "exfil", "wiper", "critical")):
+        severity = "Critical"
+    elif any(word in lower for word in ("malware", "breach", "backdoor", "high")):
+        severity = "High"
+    elif any(word in lower for word in ("suspicious", "warning", "medium", "anomaly")):
+        severity = "Medium"
+
+    indicators = set(IP_PATTERN.findall(scope))
+    indicators.update(match for match in DOMAIN_PATTERN.findall(scope) if "." in match and len(match) <= 64)
+    indicators = sorted(indicators)[:6]
+
+    actions = []
+    for line in scope.splitlines():
+        stripped = line.strip("-•* ").strip()
+        if stripped and len(stripped.split()) > 2:
+            if line.strip().startswith(("-", "*", "•")) or stripped.lower().startswith(
+                ("contain", "investigate", "reset", "block", "notify")
+            ):
+                actions.append(stripped)
+    if not actions:
+        actions = [
+            "Correlate events with SIEM timelines.",
+            "Collect packet capture or EDR telemetry for affected hosts.",
+            "Escalate to incident response if new high-severity indicators appear.",
+        ]
+    return {"severity": severity, "indicators": indicators, "actions": actions[:5]}
+
+
 class LogAnomalyScorer:
     def __init__(self) -> None:
         ratios = np.linspace(0, 1, 11)
@@ -93,7 +250,6 @@ class PhishingDetector:
     def __init__(self) -> None:
         data = pd.DataFrame(
             [
-                # url_len, num_dots, num_hyphen, has_https, has_suspicious_word, label
                 [20, 1, 0, 1, 0, 0],
                 [55, 4, 2, 0, 1, 1],
                 [12, 0, 0, 1, 0, 0],
@@ -185,7 +341,7 @@ def set_security_headers(response):
         "Content-Security-Policy",
         "default-src 'self'; "
         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
-        "script-src 'self' https://cdn.jsdelivr.net; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
         "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com data:",
     )
     return response
@@ -202,7 +358,8 @@ def index():
             "SELECT module, COUNT(*) as count FROM activity_logs GROUP BY module"
         ).fetchall()
     stats = {row["module"]: row["count"] for row in totals}
-    return render_template("index.html", active_tab="home", recent=recent, stats=stats)
+    posture = compute_posture(stats)
+    return render_template("index.html", active_tab="home", recent=recent, stats=stats, posture=posture)
 
 
 @app.route("/logs", methods=["GET", "POST"])
@@ -490,6 +647,48 @@ def crypto():
     result = {"message": message, "download": url_for("download_processed", filename=stored_filename)}
     log_activity("crypto", {"mode": mode})
     return render_template("crypto.html", active_tab="crypto", result=result)
+
+
+@app.route("/ai", methods=["GET", "POST"])
+def ai():
+    stored_chat = session.get("ai_chat", [])
+    chat: List[Dict[str, str]] = list(stored_chat)
+    summary = session.get("ai_summary")
+    mode = session.get("ai_mode") or ("live" if os.getenv("AI_API_KEY") else "demo")
+
+    if request.method == "POST":
+        user_message = request.form.get("message", "").strip()
+        if not user_message:
+            flash("Provide context (logs, indicators, questions) for the AI analyst.")
+            return redirect(url_for("ai"))
+
+        chat.append({"role": "user", "content": user_message})
+        history = [{"role": "system", "content": AI_SYSTEM_PROMPT}] + chat
+        ai_result = call_ai_backend(history)
+        if ai_result.get("error"):
+            flash(ai_result["error"])
+        else:
+            chat.append({"role": "assistant", "content": ai_result["message"]})
+            summary = build_ai_summary(chat)
+            session["ai_chat"] = chat
+            session["ai_summary"] = summary
+            mode = "demo" if ai_result.get("demo") else "live"
+            session["ai_mode"] = mode
+            log_activity("ai", {"mode": mode, "tokens": len(history)})
+        return redirect(url_for("ai"))
+
+    render_chat = chat if chat else AI_DEFAULT_THREAD
+    summary = summary or build_ai_summary(render_chat)
+    return render_template("ai.html", active_tab="ai", chat=render_chat, summary=summary, ai_mode=mode)
+
+
+@app.route("/ai/reset", methods=["POST"])
+def reset_ai():
+    session.pop("ai_chat", None)
+    session.pop("ai_summary", None)
+    session.pop("ai_mode", None)
+    flash("AI analyst conversation cleared.")
+    return redirect(url_for("ai"))
 
 
 @app.route("/downloads/<path:filename>")

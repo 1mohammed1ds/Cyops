@@ -8,27 +8,38 @@
         <span class="icon-pill"><i class="bi bi-chat-dots"></i></span>
         <span class="title">Conversation</span>
       </div>
-      <div class="d-flex justify-content-between align-items-center">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
-          <p class="text-uppercase text-muted small mb-1">Alpha preview</p>
+          <p class="text-uppercase text-muted small mb-1">CyOps analyst</p>
           <h5 class="mb-0">Investigation thread</h5>
         </div>
-        <span class="badge-pill badge-suspicious">demo</span>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge-pill {% if ai_mode == 'live' %}badge-clean{% else %}badge-suspicious{% endif %}">
+            {{ ai_mode|default('demo')|title }} mode
+          </span>
+          <form method="POST" action="{{ url_for('reset_ai') }}">
+            <button class="btn btn-outline btn-sm" type="submit">Clear</button>
+          </form>
+        </div>
       </div>
       <div class="chat-thread">
-        <div class="chat-bubble">
-          <strong>AI:</strong> Ready to summarise latest alerts. Provide context such as log snippets, threat intel hits, or policy questions.
-        </div>
-        <div class="chat-bubble user">
-          Analyst: Collate anomalies from last log scan and pivot on suspicious hostnames.
-        </div>
-        <div class="chat-bubble">
-          <strong>AI:</strong> Detected 12% error ratio, host: auth-core.internal. Recommend blocking repeated IP 203.0.113.42 and escalating to Tier-2.
-        </div>
+        {% if chat %}
+          {% for entry in chat %}
+            <div class="chat-bubble {% if entry.role == 'user' %}user{% endif %}">
+              <strong>{{ 'Analyst' if entry.role == 'user' else 'AI' }}:</strong>
+              <span>{{ entry.content }}</span>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">
+            <i class="bi bi-robot"></i>
+            <p class="mb-0">Start the conversation by sharing log snippets, indicators, or IR questions.</p>
+          </div>
+        {% endif %}
       </div>
-      <form class="chat-input">
-        <textarea placeholder="Coming soon — connect this area to your AI back-end." disabled></textarea>
-        <button class="btn btn-primary" type="button" disabled>
+      <form class="chat-input" method="POST" action="{{ url_for('ai') }}" data-loading="true">
+        <textarea name="message" placeholder="Paste suspicious logs, indicators, or ask for next actions." required></textarea>
+        <button class="btn btn-primary" type="submit" data-loading-button="Sending...">
           <i class="bi bi-send"></i>
         </button>
       </form>
@@ -40,22 +51,37 @@
         <span class="icon-pill"><i class="bi bi-kanban"></i></span>
         <span class="title">Summary</span>
       </div>
+      {% set severity = summary.severity|default('Info') %}
+      {% set badge_class = 'badge-clean' %}
+      {% if severity.lower() in ['critical', 'high'] %}
+        {% set badge_class = 'badge-malicious' %}
+      {% elif severity.lower() == 'medium' %}
+        {% set badge_class = 'badge-suspicious' %}
+      {% endif %}
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">Summary</h5>
-        <span class="badge-pill badge-suspicious">Medium</span>
+        <h5 class="mb-0">Operational picture</h5>
+        <span class="badge-pill {{ badge_class }}">{{ severity }}</span>
       </div>
-      <p class="text-muted small mb-3">Auto-generated highlights from AI assistant.</p>
+      <p class="text-muted small mb-3">Auto-generated highlights from CyOps AI.</p>
       <p class="text-uppercase text-muted small mb-2">Indicators</p>
       <ul class="list-clean small mb-4">
-        <li>auth-core.internal · 12 failed logins</li>
-        <li>203.0.113.42 · suspicious port scan</li>
-        <li>vt-digest: 3 malicious engines</li>
+        {% if summary.indicators %}
+          {% for indicator in summary.indicators %}
+            <li>{{ indicator }}</li>
+          {% endfor %}
+        {% else %}
+          <li>No indicators extracted yet.</li>
+        {% endif %}
       </ul>
       <p class="text-uppercase text-muted small mb-2">Recommended actions</p>
       <ul class="list-clean small mb-0">
-        <li>Quarantine affected workstation scope.</li>
-        <li>Request VT rescan with latest sample.</li>
-        <li>Escalate to IR runbook section 4.</li>
+        {% if summary.actions %}
+          {% for action in summary.actions %}
+            <li>{{ action }}</li>
+          {% endfor %}
+        {% else %}
+          <li>Share more telemetry to produce action items.</li>
+        {% endif %}
       </ul>
     </div>
   </div>

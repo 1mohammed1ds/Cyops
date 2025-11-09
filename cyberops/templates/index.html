@@ -11,12 +11,34 @@
       <div class="d-flex justify-content-between align-items-start mb-3">
         <div>
           <p class="text-uppercase text-muted small mb-1">Your Security Posture</p>
-          <h3 class="mb-1">Operational</h3>
-          <p class="text-muted mb-0">Coverage across logs, phishing, intel and crypto modules.</p>
+          <h3 class="mb-1">{{ posture.status }}</h3>
+          <p class="text-muted mb-0">Usage-weighted score across logs, phishing, intel, integrity, and crypto.</p>
         </div>
-        <span class="badge-pill badge-clean">Stable</span>
+        <span class="badge-pill stat-chip {{ posture.badge_class }}">{{ posture.badge }}</span>
       </div>
-      <div class="mini-chart w-100"></div>
+      <div class="posture-visual">
+        <div class="posture-tiles">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="posture-line-layer">
+          <svg class="posture-line" viewBox="0 0 300 120" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="postureLine" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="rgba(255,255,255,0.5)" />
+                <stop offset="100%" stop-color="rgba(255,255,255,0.95)" />
+              </linearGradient>
+            </defs>
+            <polyline points="0,90 60,80 120,60 180,40 240,55 300,20" stroke="url(#postureLine)" />
+          </svg>
+          <div class="posture-dot" style="left: {{ posture.dot_left }}%; top: {{ posture.dot_top }}%;"></div>
+        </div>
+        <div class="posture-score-pill">
+          <span class="score">{{ posture.score }}</span>
+          <span class="label">Posture score</span>
+        </div>
+      </div>
     </div>
   </div>
   <div class="col-xl-4 col-lg-6">
@@ -54,14 +76,17 @@
         <span class="icon-pill"><i class="bi bi-person-badge"></i></span>
         <span class="title">Analyst</span>
       </div>
-      <p class="text-uppercase text-muted small mb-2">Analyst Notes</p>
-      <h5 class="mb-3">Environment</h5>
+      <p class="text-uppercase text-muted small mb-2">Analyst tips</p>
+      <h5 class="mb-3">Next recommended actions</h5>
       <ul class="list-clean small mb-4">
-        <li>Threat Intel APIs: {{ 'Configured' if stats else 'Demo Mode' }}</li>
-        <li>HTTPS Enforcement: toggle via ENFORCE_HTTPS</li>
-        <li>Uploads Folder: /uploads</li>
+        <li>Run {{ stats.get('logs', 0) | default(0) + 1 }} keyword scans each shift to maintain baseline visibility.</li>
+        <li>Cross-check new indicators in Threat Intel before releasing containment.</li>
+        <li>Regenerate integrity hashes after every approved change window.</li>
       </ul>
-      <button class="btn btn-outline w-100">Review Playbooks</button>
+      <div class="d-grid gap-2">
+        <a class="btn btn-outline" href="{{ url_for('logs') }}">Open Log Monitor</a>
+        <a class="btn btn-primary" href="{{ url_for('threatintel') }}">Launch Threat Lookup</a>
+      </div>
     </div>
   </div>
 </div>
