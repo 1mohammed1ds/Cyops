@@ -4,6 +4,10 @@
 <div class="row g-4 mb-4">
   <div class="col-xl-4 col-lg-6">
     <div class="card-soft h-100">
+      <div class="card-icon">
+        <span class="icon-pill"><i class="bi bi-speedometer2"></i></span>
+        <span class="title">Security posture</span>
+      </div>
       <div class="d-flex justify-content-between align-items-start mb-3">
         <div>
           <p class="text-uppercase text-muted small mb-1">Your Security Posture</p>
@@ -17,6 +21,10 @@
   </div>
   <div class="col-xl-4 col-lg-6">
     <div class="card-soft h-100">
+      <div class="card-icon">
+        <span class="icon-pill"><i class="bi bi-clock-history"></i></span>
+        <span class="title">Activity</span>
+      </div>
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="mb-0">Recent Activity</h5>
         <span class="text-muted small">Last 5 events</span>
@@ -42,6 +50,10 @@
   </div>
   <div class="col-xl-4">
     <div class="card-soft h-100">
+      <div class="card-icon">
+        <span class="icon-pill"><i class="bi bi-person-badge"></i></span>
+        <span class="title">Analyst</span>
+      </div>
       <p class="text-uppercase text-muted small mb-2">Analyst Notes</p>
       <h5 class="mb-3">Environment</h5>
       <ul class="list-clean small mb-4">
@@ -58,22 +70,34 @@
   <div class="col-12">
     <div class="stat-grid">
       <div class="stat-card">
-        <div class="label">Log scans</div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="icon-pill"><i class="bi bi-clipboard-data"></i></span>
+          <div class="label">Log scans</div>
+        </div>
         <div class="value">{{ stats.get('logs', 0) }}</div>
         <div class="text-muted small">Keyword + ML anomaly triage</div>
       </div>
       <div class="stat-card">
-        <div class="label">Phishing checks</div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="icon-pill"><i class="bi bi-envelope-open"></i></span>
+          <div class="label">Phishing checks</div>
+        </div>
         <div class="value">{{ stats.get('phishing', 0) }}</div>
         <div class="text-muted small">Detections via heuristics + ML</div>
       </div>
       <div class="stat-card">
-        <div class="label">Integrity verifications</div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="icon-pill"><i class="bi bi-shield-lock"></i></span>
+          <div class="label">Integrity verifications</div>
+        </div>
         <div class="value">{{ stats.get('integrity', 0) }}</div>
         <div class="text-muted small">SHA-256 matches this session</div>
       </div>
       <div class="stat-card">
-        <div class="label">Threat intel pulls</div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="icon-pill"><i class="bi bi-radar"></i></span>
+          <div class="label">Threat intel pulls</div>
+        </div>
         <div class="value">{{ stats.get('threat', 0) }}</div>
         <div class="text-muted small">Aggregated from VT + AbuseIPDB + Shodan</div>
       </div>

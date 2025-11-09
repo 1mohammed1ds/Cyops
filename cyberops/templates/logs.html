@@ -5,6 +5,10 @@
 <div class="row g-4">
   <div class="col-lg-5">
     <div class="card-soft h-100">
+      <div class="card-icon">
+        <span class="icon-pill"><i class="bi bi-cloud-arrow-up"></i></span>
+        <span class="title">Upload</span>
+      </div>
       <p class="text-uppercase text-muted small mb-2">Upload</p>
       <h4 class="mb-3">Scan log evidence</h4>
       <p class="text-muted small mb-4">Supported formats: .log, .txt (50 MB). We highlight error lines and blend in an ML anomaly score.</p>
@@ -28,6 +32,10 @@
 
   <div class="col-lg-7">
     <div class="card-soft h-100">
+      <div class="card-icon">
+        <span class="icon-pill"><i class="bi bi-activity"></i></span>
+        <span class="title">Insights</span>
+      </div>
       {% if results %}
         {% set severity = results.severity %}
         {% if severity in ['safe', 'clean'] %}

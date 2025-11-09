@@ -4,6 +4,10 @@
 <div class="row g-4">
   <div class="col-xl-8">
     <div class="card-soft h-100">
+      <div class="card-icon">
+        <span class="icon-pill"><i class="bi bi-files"></i></span>
+        <span class="title">Hashes</span>
+      </div>
       <p class="text-uppercase text-muted small mb-2">Hashes</p>
       <h4 class="mb-3">Compare two artefacts</h4>
       <p class="text-muted small mb-4">We hash both inputs with SHA-256 and highlight mismatches for quick release readiness checks.</p>
@@ -26,6 +30,10 @@
   </div>
   <div class="col-xl-4">
     <div class="card-soft h-100">
+      <div class="card-icon">
+        <span class="icon-pill"><i class="bi bi-lightbulb"></i></span>
+        <span class="title">Tips</span>
+      </div>
       <p class="text-uppercase text-muted small mb-2">Tips</p>
       <ul class="list-clean small mb-0">
         <li>Verify vendor downloads before production use.</li>
@@ -39,6 +47,10 @@
 {% if result %}
   {% set banner_class = 'success' if result.match else 'danger' %}
   <div class="card-soft mt-4">
+    <div class="card-icon">
+      <span class="icon-pill"><i class="bi {{ 'bi-check2-circle' if result.match else 'bi-exclamation-triangle' }}"></i></span>
+      <span class="title">Result</span>
+    </div>
     <div class="result-banner {{ banner_class }}">
       <i class="bi {{ 'bi-shield-check' if result.match else 'bi-exclamation-triangle' }}"></i>
       <div>

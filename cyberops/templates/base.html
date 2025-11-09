@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CyberOpsHub</title>
+    <title>CYOPS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,47 +15,47 @@
   <body>
     <aside class="sidebar">
       <div class="brand">
-        <i class="bi bi-shield-lock"></i>
-        <span class="brand-text">CyberOpsHub</span>
+        <span class="icon-pill light"><i class="bi bi-shield-lock"></i></span>
+        <span class="brand-text">CYOPS</span>
       </div>
       <nav class="nav flex-column w-100">
         <a class="nav-link {% if active_tab == 'home' %}is-active{% endif %}" href="{{ url_for('index') }}">
-          <i class="bi bi-house"></i>
-          <span>Home</span>
+          <span class="icon-pill light"><i class="bi bi-house"></i></span>
+          <span class="nav-label">Home</span>
         </a>
         <a class="nav-link {% if active_tab == 'logs' %}is-active{% endif %}" href="{{ url_for('logs') }}">
-          <i class="bi bi-journal-text"></i>
-          <span>Logs</span>
+          <span class="icon-pill light"><i class="bi bi-clipboard-data"></i></span>
+          <span class="nav-label">Logs</span>
         </a>
         <a class="nav-link {% if active_tab == 'phishing' %}is-active{% endif %}" href="{{ url_for('phishing') }}">
-          <i class="bi bi-envelope-exclamation"></i>
-          <span>Phishing</span>
+          <span class="icon-pill light"><i class="bi bi-envelope-open"></i></span>
+          <span class="nav-label">Phishing</span>
         </a>
         <a class="nav-link {% if active_tab == 'integrity' %}is-active{% endif %}" href="{{ url_for('integrity') }}">
-          <i class="bi bi-shield-check"></i>
-          <span>Integrity</span>
+          <span class="icon-pill light"><i class="bi bi-shield-check"></i></span>
+          <span class="nav-label">Integrity</span>
         </a>
         <a class="nav-link {% if active_tab == 'threat' %}is-active{% endif %}" href="{{ url_for('threatintel') }}">
-          <i class="bi bi-globe2"></i>
-          <span>Threat</span>
+          <span class="icon-pill light"><i class="bi bi-globe2"></i></span>
+          <span class="nav-label">Threat</span>
         </a>
         <a class="nav-link {% if active_tab == 'ai' %}is-active{% endif %}" href="/ai">
-          <i class="bi bi-robot"></i>
-          <span>AI Analyst</span>
+          <span class="icon-pill light"><i class="bi bi-cpu"></i></span>
+          <span class="nav-label">AI Analyst</span>
         </a>
         <a class="nav-link {% if active_tab == 'crypto' %}is-active{% endif %}" href="{{ url_for('crypto') }}">
-          <i class="bi bi-lock"></i>
-          <span>Crypto</span>
+          <span class="icon-pill light"><i class="bi bi-safe2"></i></span>
+          <span class="nav-label">Crypto</span>
         </a>
       </nav>
       <div class="sidebar-footer">
         <a href="#" class="nav-link small">
-          <i class="bi bi-gear"></i>
-          <span>Settings</span>
+          <span class="icon-pill light"><i class="bi bi-gear"></i></span>
+          <span class="nav-label">Settings</span>
         </a>
         <a href="#" class="nav-link small text-danger">
-          <i class="bi bi-box-arrow-right"></i>
-          <span>Logout</span>
+          <span class="icon-pill light"><i class="bi bi-box-arrow-right"></i></span>
+          <span class="nav-label">Logout</span>
         </a>
       </div>
     </aside>

@@ -183,7 +183,10 @@ def set_security_headers(response):
     response.headers.setdefault("X-Frame-Options", "DENY")
     response.headers.setdefault(
         "Content-Security-Policy",
-        "default-src 'self'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' https://cdn.jsdelivr.net",
+        "default-src 'self'; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+        "script-src 'self' https://cdn.jsdelivr.net; "
+        "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com data:",
     )
     return response
 
