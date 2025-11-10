@@ -1,37 +1,55 @@
-# Cyops - Security Operations Dashboard
+# 🛡️ CyberOpsHub — AI-Integrated Security Operations Dashboard
 
-Overview:
-CyberOpsHub is a unified web-based Security Operations Center (SOC) dashboard built with Flask, designed to integrate multiple cybersecurity utilities — log monitoring, file-integrity verification, phishing detection, and threat-intelligence lookups — into a single, AI-ready interface.
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python\&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-Web%20Framework-black?logo=flask)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-purple?logo=bootstrap)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Project%20Status-Active-brightgreen)
 
-✨ Key Features:
-------------------
+---
 
-Log Monitor: Upload and analyze system logs for failed logins, unauthorized access, or error events.
+### Unified Cybersecurity Dashboard Built with Flask
 
-File Integrity Checker: Compare file hashes (SHA-256) to detect tampering or unauthorized changes.
+**CyberOpsHub** is a full-stack **Security Operations Center (SOC)** dashboard that brings together multiple cybersecurity utilities—log monitoring, file integrity checking, and threat-intelligence lookups—into one streamlined, AI-ready interface.
 
-Threat Intelligence: Query IPs or domains using the VirusTotal API (with demo fallback).
+It’s designed as a hands-on, real-world style project for cybersecurity students, analysts, and developers who want to experience how professional SOC tools like Splunk, Darktrace, or SOAR systems unify data and automate detection.
 
-AI Analyst (Preview): A planned virtual SOC assistant that summarizes logs and provides next-step recommendations.
+---
 
-Modular Flask Architecture: Each tool runs independently but is unified under one dashboard for scalability.
+## Features
 
-Responsive Dashboard UI: Modern SaaS-style interface with dark sidebar, white content cards, and Bootstrap-based layout.
+### 🧾 Log Monitor
 
-🧰 Tech Stack:
----------------
+Upload log files (e.g., system, authentication, or web server logs) and automatically flag suspicious entries such as failed logins, invalid credentials, or access denials.
 
-Backend: Python (Flask, hashlib, requests)
+### 🔐 File Integrity Checker
 
-Frontend: HTML5, CSS3, Bootstrap 5, Jinja2
+Compare two files and verify whether tampering or unauthorized changes occurred using SHA-256 hashing.
 
-APIs: VirusTotal (with environment variable support)
+### 🌍 Threat Intelligence Lookup
 
-Utilities: Virtual environments, pip dependencies, and modular file structure
+Check the reputation of IPs or domains using the **VirusTotal API**, with a fallback “demo mode” when no API key is provided.
 
-📂 Folder Structure:
----------------------
+### 🤖 AI Analyst *(Coming Soon)*
 
+An intelligent assistant designed to summarize log anomalies, correlate findings, and recommend mitigation steps in natural language.
+
+---
+
+## 🧰 Tech Stack
+
+| Layer           | Tools / Libraries                  |
+| --------------- | ---------------------------------- |
+| **Backend**     | Python, Flask, hashlib, requests   |
+| **Frontend**    | HTML5, CSS3, Bootstrap 5, Jinja2   |
+| **APIs**        | VirusTotal (optional)              |
+| **Development** | VS Code, Git, virtual environments |
+
+---
+
+## 🧩 Project Structure
+
+```
 cyberops/
 ├── app.py
 ├── requirements.txt
@@ -44,52 +62,97 @@ cyberops/
     ├── integrity.html
     ├── threat.html
     └── ai.html
+```
 
+---
 
-🚀 Setup Instructions:
+## ⚙️ Setup & Installation
 
-Clone the repository
-----------------------
+### 1. Clone the repository
 
-git clone https://github.com/yourusername/cyberopshub.git
-cd cyberopshub
+```bash
+git clone https://github.com/<your-username>/CyberOpsHub.git
+cd CyberOpsHub
+```
 
+### 2. Create a virtual environment
 
-Create a virtual environment
------------------------------
-
+```bash
 python -m venv venv
-.\venv\Scripts\activate
+.\venv\Scripts\activate        # Windows
+# or
+source venv/bin/activate       # macOS/Linux
+```
 
+### 3. Install dependencies
 
-Install dependencies
-----------------------
-
+```bash
 pip install -r requirements.txt
+```
 
+### 4. (Optional) Add your VirusTotal API key
 
-(Optional) Set your VirusTotal API key
----------------------------------------
+```bash
+setx VT_API_KEY "YOUR_KEY"           # Windows
+export VT_API_KEY="YOUR_KEY"         # macOS/Linux
+```
 
-setx VT_API_KEY "YOUR_KEY_HERE"
+### 5. Run the app
 
-
-Run the app
---------------
-
+```bash
 python app.py
+```
+
+Then open **[http://127.0.0.1:5000](http://127.0.0.1:5000)** in your browser.
+
+## 🧠 How It Works
+
+Each module runs independently inside the Flask app:
+
+* **`/logs`** → Scans uploaded text logs and highlights suspicious activity.
+* **`/integrity`** → Computes and compares SHA-256 hashes to detect tampering.
+* **`/threat`** → Queries VirusTotal API to assess IP/domain reputation.
+
+Results are displayed in a clean, modern dashboard built with Bootstrap 5 and custom CSS inspired by professional SOC interfaces.
+
+---
+
+## 🌐 Deployment
+
+You can host CyberOpsHub on:
+
+* **Render** → free & simple Flask hosting
+* **Railway.app** → modern full-stack deployment
+* **Fly.io** → Docker-based app hosting
+
+Add `gunicorn` to your dependencies and set the startup command:
+
+```bash
+gunicorn app:app
+```
 
 
-Open http://127.0.0.1:5000
- in your browser.
+## License
 
-💡 Future Enhancements:
+Licensed under the **MIT License** — you’re free to use, modify, and share this project with attribution.
 
-Integrate OpenAI API for AI-powered log summarization and risk scoring
+---
 
-Add real-time alert visualization with charts (using Chart.js or Recharts)
+## Author
 
-Expand with Shodan and AbuseIPDB integrations
+**Mohammed bin Abdul Salam**
+Cybersecurity & Data Analytics Enthusiast
+ Based in Dubai | Focused on SOC Automation & Threat Analysis
 
-🧑‍💻 Ideal For:
-Cybersecurity students and professionals who want to demonstrate SOC operations, Flask development, and threat-intelligence automation in one hands-on project.
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin)](https://www.linkedin.com/in/m-salam/)
+
+---
+
+## Support
+
+If you find this project helpful, consider giving it a **star ⭐** — it helps others discover it and keeps the project growing.
+
+---
+
+**Disclaimer:** This project is intended for educational and defensive cybersecurity use only.  
+Do not deploy, scan, or test systems without proper authorization.
